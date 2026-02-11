@@ -35,6 +35,11 @@ API_KEY = os.getenv("API_KEY")
 if not API_KEY:
     raise RuntimeError("API_KEY must be set")
 
+# Quick caching mechanism
+# TODO DC: probably not thread safe.
+# it also won't work if we add something else in addition to Outline
+previous_pocket_userstore = None
+
 
 @app.get("/sync/outline")
 def validate_login(x_api_key: str = Header(...)):
@@ -42,11 +47,22 @@ def validate_login(x_api_key: str = Header(...)):
         logger.warning("Invalid API Key: %s", x_api_key)
         raise HTTPException(status_code=403)
 
+    global previous_pocket_userstore
     logger.info("Syncing Pocket Groups to Outline")
-    outline.create_missing_groups(pocket.get_unique_groups())
-    outline.delete_extra_groups(pocket.get_unique_groups())
-    outline.set_missing_group_memberships(pocket.sync_from_pocket_id())
-    outline.delete_extra_group_memberships(pocket.sync_from_pocket_id())
+    pocket_store = pocket.sync_from_pocket_id()
+    if pocket_store == previous_pocket_userstore:
+        logger.info("Skipping sync since Pocket Store is still the same...")
+        return {"status": "ok"}
+
+    pocket_groups = pocket.get_unique_groups()
+    outline.create_missing_groups(pocket_groups)
+    outline.delete_extra_groups(pocket_groups)
+
+    outline.set_missing_group_memberships(pocket_store)
+    outline.delete_extra_group_memberships(pocket_store)
+
+    previous_pocket_userstore = pocket_store
+    return {"status": "ok"}
 
 
 if __name__ == "__main__":

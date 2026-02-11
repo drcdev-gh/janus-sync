@@ -65,6 +65,7 @@ def sync_from_pocket_id():
             continue
 
         groups = user["userGroups"]
+        # TODO DC: Filtered groups is a misnomer from when this had a regex check as well
         filtered_groups = []
         for group in groups:
             group_name = group["name"]

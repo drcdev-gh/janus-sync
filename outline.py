@@ -8,7 +8,7 @@ logger = logging.getLogger("uvicorn")
 BASE_URL = os.getenv("OUTLINE_API_URL")
 
 # Required Outline permissions:
-# groups.create groups.list users.list groups.add_user groups.remove_user groups.delete
+# groups.create groups.list users.list groups.add_user groups.remove_user groups.delete groups.memberships
 API_KEY = os.getenv("OUTLINE_API_KEY")
 if not API_KEY:
     raise RuntimeError("OUTLINE_API_KEY must be set")
@@ -28,9 +28,8 @@ class OutlineUser:
     groups: []
 
 
-# TODO Pagination
+# TODO Pagination isn't fully handled, so anything above the 100 limit will cause issues
 def outline_post_get(endpoint: str, payload: dict = {}):
-
     resp = requests.post(
         f"{BASE_URL}/api/{endpoint}",
         json=payload,
@@ -39,9 +38,6 @@ def outline_post_get(endpoint: str, payload: dict = {}):
     )
     resp.raise_for_status()
     ret = resp.json()
-    # TODO DC: pagination - groupMemberships doesn't seem long enough
-    # Leads to us trying to set groups that are set already
-    # {'pagination': {'limit': 100, 'offset': 0, 'nextPath': '/api/groups.list?limit=100&offset=100', 'total': 7},
     return ret.get("data", [])
 
 
@@ -114,7 +110,6 @@ def build_outline_user_store():
     groups_raw = fetch_outline_groups()
 
     groups = groups_raw.get("groups", [])
-    memberships = groups_raw.get("groupMemberships", [])
     group_id_to_name = {g["id"]: g["name"] for g in groups}
 
     store = {}
@@ -127,11 +122,21 @@ def build_outline_user_store():
             groups=[]
         )
 
-    for m in memberships:
-        user_id = m["userId"]
-        group_id = m["groupId"]
-        if user_id in store and group_id in group_id_to_name:
-            store[user_id].groups.append(group_id_to_name[group_id])
+    for g in groups:
+        group_id = g["id"]
+        payload = {}
+        payload["id"] = group_id
+        payload["limit"] = 100
+        group_membership = outline_post_get("groups.memberships", payload)
+
+        for user in group_membership.get("users", []):
+            user_id = user["id"]
+            if store[user_id]:
+                group_name = group_id_to_name[group_id]
+                store[user_id].groups.append(group_name)
+            else:
+                logger.error("Invalid user found while looking for group: %s",
+                             str(user))
 
     return list(store.values())
 
