@@ -110,7 +110,6 @@ def build_outline_user_store():
     groups_raw = fetch_outline_groups()
 
     groups = groups_raw.get("groups", [])
-    group_id_to_name = {g["id"]: g["name"] for g in groups}
 
     store = {}
 
@@ -132,8 +131,7 @@ def build_outline_user_store():
         for user in group_membership.get("users", []):
             user_id = user["id"]
             if store[user_id]:
-                group_name = group_id_to_name[group_id]
-                store[user_id].groups.append(group_name)
+                store[user_id].groups.append(g["name"])
             else:
                 logger.error("Invalid user found while looking for group: %s",
                              str(user))
