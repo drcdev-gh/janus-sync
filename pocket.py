@@ -61,6 +61,8 @@ def sync_from_pocket_id():
     users = fetch_users()
 
     for user in users:
+        # TODO DC: At some point, probably will need to use this also to disable users
+        # in other services as well
         if user["disabled"] is True:
             continue
 
