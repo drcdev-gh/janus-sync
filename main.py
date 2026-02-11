@@ -54,7 +54,7 @@ def validate_login(x_api_key: str = Header(...)):
         logger.info("Skipping sync since Pocket Store is still the same...")
         return {"status": "ok"}
 
-    pocket_groups = pocket.get_unique_groups()
+    pocket_groups = pocket.get_unique_groups(pocket_store)
     outline.create_missing_groups(pocket_groups)
     outline.delete_extra_groups(pocket_groups)
 

@@ -141,18 +141,19 @@ def build_outline_user_store():
     return list(store.values())
 
 
-def get_unique_groups(user_store):
+def get_unique_groups():
+    groups_raw = fetch_outline_groups()
+    groups = groups_raw.get("groups", [])
+
     unique_groups = set()
-    for user in user_store:
-        for group in user.groups:
-            unique_groups.add(group)
+    for group in groups:
+        unique_groups.add(group["name"])
 
     return unique_groups
 
 
 def create_missing_groups(pocket_groups):
-    outline_users = build_outline_user_store()
-    outline_groups = get_unique_groups(outline_users)
+    outline_groups = get_unique_groups()
 
     for pocket_group in pocket_groups:
         if pocket_group not in outline_groups:
@@ -161,8 +162,7 @@ def create_missing_groups(pocket_groups):
 
 
 def delete_extra_groups(pocket_groups):
-    outline_users = build_outline_user_store()
-    outline_groups = get_unique_groups(outline_users)
+    outline_groups = get_unique_groups()
 
     for outline_group in outline_groups:
         if outline_group not in pocket_groups:
