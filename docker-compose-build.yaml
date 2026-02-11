@@ -1,0 +1,15 @@
+
+services:
+  pocketgroups:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "8085:8085"
+    environment:
+      POCKETID_API_URL: ${POCKETID_API_URL:?err=ENV missing}
+      POCKETID_API_KEY: ${POCKETID_API_KEY:?err=ENV missing}
+      OUTLINE_API_URL: ${OUTLINE_API_URL:?err=ENV missing}
+      OUTLINE_API_KEY: ${OUTLINE_API_KEY:?err=ENV missing}
+      API_KEY: ${API_KEY:?err=ENV missing}
