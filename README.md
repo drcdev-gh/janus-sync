@@ -1,5 +1,31 @@
 # janus-sync — SSO permission propagation daemon
 
-Syncs groups etc. from PocketID to other services.
-Right now, this is in the early development stages and only supports Outline.
-It's also terribly inefficient.
+Lets other services commonly found in organisations or homelabs access group or claim information from PocketID.
+
+## Outline
+
+- Syncs all users and groups from PocketID to Outline
+- Extra groups in Outline are deleted
+- Known limitations:
+    - Only up to 100 users work
+    - Disabled users in PocketID aren't handled at all
+
+## SSH
+
+Lets users validate their SSH key in order to gain access via `AuthorizedKeyCommand`.
+A passed in SSH key is valid if it is stored as a custom claim `ssh-pubkey` on the user
+and if the user is part of the configured `SSH_ALLOWED_GROUP` environment variable.
+
+Here's an example of how to call the endpoint:
+```
+curl -s -G --data-urlencode "pubkey=ssh-ed25519 mykey" -H "x-api-key:mysecretkey" http://127.0.0.1:8085/ssh/validate
+```
+
+And here's howto use it in the SSH config:
+```
+Match User oidc
+    AuthorizedKeysCommand curl -s -G --data-urlencode "pubkey=%k" -H "x-api-key:mysecretkey" http://127.0.0.1:8085/ssh/validate
+    AuthorizedKeysCommandUser oidc
+```
+
+
