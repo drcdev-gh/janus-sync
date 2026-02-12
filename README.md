@@ -1,4 +1,4 @@
-# Pocket Sync
+# janus-sync — SSO permission propagation daemon
 
 Syncs groups etc. from PocketID to other services.
 Right now, this is in the early development stages and only supports Outline.

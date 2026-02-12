@@ -1,6 +1,6 @@
 
 services:
-  pocketgroups:
+  janus-sync:
     build:
       context: .
       dockerfile: Dockerfile

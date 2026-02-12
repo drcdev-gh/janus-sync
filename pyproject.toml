@@ -1,5 +1,5 @@
 [project]
-name = "pocketgroups"
+name = "janus-sync"
 version = "0.1.0" # Not used!
 requires-python = ">=3.12"
 dependencies = [

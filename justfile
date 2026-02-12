@@ -1,6 +1,6 @@
 set shell := ["bash", "-eu", "-o", "pipefail", "-c"]
 
-TAG_BASE:="ghcr.io/drcdev-gh/pocketgroups"
+TAG_BASE:="ghcr.io/drcdev-gh/janus-sync"
 
 run-dev:
     docker compose -f docker-compose-build.yaml up -d --build
