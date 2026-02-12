@@ -41,8 +41,8 @@ if not API_KEY:
 previous_pocket_userstore = None
 
 
-@app.get("/sync/outline")
-def validate_login(x_api_key: str = Header(...)):
+@app.get("/outline/sync")
+def sync_outline(x_api_key: str = Header(...)):
     if x_api_key != API_KEY:
         logger.warning("Invalid API Key: %s", x_api_key)
         raise HTTPException(status_code=403)
