@@ -19,8 +19,9 @@ HEADERS = {
 class PocketUser:
     username: str
     user_id: str
-    email: str | None
-    groups: Set[str] = field(default_factory=set)
+    email: str
+    groups: Set[str]
+    custom_claims: list[dict]
 
 
 def fetch_users():
@@ -76,7 +77,8 @@ def sync_from_pocket_id():
         userobj = PocketUser(username=user["username"],
                              user_id=user["id"],
                              email=user["email"],
-                             groups=filtered_groups)
+                             groups=filtered_groups,
+                             custom_claims=user["customClaims"])
         user_store.append(userobj)
 
     return user_store

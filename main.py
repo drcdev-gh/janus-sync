@@ -6,6 +6,7 @@ import os
 
 import pocket
 import outline
+import ssh
 
 logger = logging.getLogger("uvicorn")
 
@@ -14,6 +15,7 @@ REQUIRED_ENVS = [
     "POCKETID_API_KEY",
     "OUTLINE_API_URL",
     "OUTLINE_API_KEY",
+    "SSH_ALLOWED_GROUP",
     "API_KEY",
 ]
 
@@ -39,7 +41,6 @@ if not API_KEY:
 # TODO DC: probably not thread safe.
 # it also won't work if we add something else in addition to Outline
 previous_pocket_userstore = None
-
 
 @app.get("/outline/sync")
 def sync_outline(x_api_key: str = Header(...)):
@@ -72,6 +73,16 @@ def sync_outline(x_api_key: str = Header(...)):
 
     previous_pocket_userstore = pocket_store
     return {"status": "ok"}
+
+
+@app.get("/ssh/validate")
+def validate_ssh_login(pubkey: str, x_api_key: str = Header(...)):
+    if x_api_key != API_KEY:
+        logger.warning("Invalid API Key: %s", x_api_key)
+        raise HTTPException(status_code=403)
+
+    pocket_store = pocket.sync_from_pocket_id()
+    return ssh.validate_pubkey(pubkey, pocket_store)
 
 
 if __name__ == "__main__":

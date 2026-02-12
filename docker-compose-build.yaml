@@ -12,4 +12,5 @@ services:
       POCKETID_API_KEY: ${POCKETID_API_KEY:?err=ENV missing}
       OUTLINE_API_URL: ${OUTLINE_API_URL:?err=ENV missing}
       OUTLINE_API_KEY: ${OUTLINE_API_KEY:?err=ENV missing}
+      SSH_ALLOWED_GROUP: ${SSH_ALLOWED_GROUP:?err=ENV missing}
       API_KEY: ${API_KEY:?err=ENV missing}
