@@ -21,10 +21,11 @@ Here's an example of how to call the endpoint:
 curl -s -G --data-urlencode "pubkey=ssh-ed25519 mykey" -H "x-api-key:mysecretkey" http://127.0.0.1:8085/ssh/validate
 ```
 
-And here's howto use it in the SSH config:
+To use this in the SSH config, use the included script `verify_key.sh` like so:
 ```
 Match User oidc
-    AuthorizedKeysCommand curl -s -G --data-urlencode "pubkey=%t %k" -H "x-api-key:mysecretkey" http://127.0.0.1:8085/ssh/validate
+    AuthorizedKeysFile none
+    AuthorizedKeysCommand /usr/local/bin/verify_key.sh %t %k
     AuthorizedKeysCommandUser oidc
 ```
 

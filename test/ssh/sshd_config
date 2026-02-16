@@ -6,10 +6,10 @@ PasswordAuthentication no
 ChallengeResponseAuthentication no
 UsePam no
 
-Match User root
+Match User oidc
     AuthorizedKeysFile none
     AuthorizedKeysCommand /usr/local/bin/verify_key.sh %t %k
-    AuthorizedKeysCommandUser root
+    AuthorizedKeysCommandUser oidc
 
 LogLevel DEBUG3
 
