@@ -24,7 +24,7 @@ curl -s -G --data-urlencode "pubkey=ssh-ed25519 mykey" -H "x-api-key:mysecretkey
 And here's howto use it in the SSH config:
 ```
 Match User oidc
-    AuthorizedKeysCommand curl -s -G --data-urlencode "pubkey=%k" -H "x-api-key:mysecretkey" http://127.0.0.1:8085/ssh/validate
+    AuthorizedKeysCommand curl -s -G --data-urlencode "pubkey=%t %k" -H "x-api-key:mysecretkey" http://127.0.0.1:8085/ssh/validate
     AuthorizedKeysCommandUser oidc
 ```
 

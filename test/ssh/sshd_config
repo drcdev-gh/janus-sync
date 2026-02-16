@@ -1,0 +1,15 @@
+Port 22
+Protocol 2
+
+PermitRootLogin yes
+PasswordAuthentication no
+ChallengeResponseAuthentication no
+UsePam no
+
+Match User root
+    AuthorizedKeysFile none
+    AuthorizedKeysCommand /usr/local/bin/verify_key.sh %t %k
+    AuthorizedKeysCommandUser root
+
+LogLevel DEBUG3
+

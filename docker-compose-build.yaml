@@ -1,6 +1,7 @@
 
 services:
   janus-sync:
+    hostname: janus
     build:
       context: .
       dockerfile: Dockerfile
@@ -14,3 +15,19 @@ services:
       OUTLINE_API_KEY: ${OUTLINE_API_KEY:?err=ENV missing}
       SSH_ALLOWED_GROUP: ${SSH_ALLOWED_GROUP:?err=ENV missing}
       API_KEY: ${API_KEY:?err=ENV missing}
+    networks:
+      - janus-net
+
+  ssh-test:
+    hostname: ssh-test
+    build:
+      context: ./test/ssh
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "2222:22"
+    networks:
+      - janus-net
+
+networks:
+  janus-net:
