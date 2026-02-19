@@ -29,4 +29,5 @@ Match User oidc
     AuthorizedKeysCommandUser oidc
 ```
 
+Make sure to modify the hostname and API key in the script.
 
