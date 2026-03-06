@@ -155,7 +155,7 @@ wheels = [
 ]
 
 [[package]]
-name = "janus-sync"
+name = "janus"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
