@@ -1,5 +1,6 @@
 from fastapi import FastAPI, Header, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from datetime import datetime, timedelta
 import logging
 import sys
 import os
@@ -39,8 +40,34 @@ if not API_KEY:
 
 # Quick caching mechanism
 # TODO DC: probably not thread safe.
-# it also won't work if we add something else in addition to Outline
-previous_pocket_userstore = None
+pocket_userstore = None
+last_updated_timestamp = None
+
+
+def update_pocket_userstore(force_update: bool):
+    global pocket_userstore, last_updated_timestamp
+
+    has_been_updated = False
+    now = datetime.utcnow()
+
+    def should_refresh():
+        return (
+            pocket_userstore is None or
+            last_updated_timestamp is None or
+            now - last_updated_timestamp > timedelta(minutes=30)
+        )
+
+    if force_update or should_refresh():
+        new_userstore = pocket.sync_from_pocket_id()
+
+        if new_userstore != pocket_userstore:
+            has_been_updated = True
+
+        pocket_userstore = new_userstore
+        last_updated_timestamp = now
+
+    return has_been_updated
+
 
 @app.get("/outline/sync")
 def sync_outline(x_api_key: str = Header(...)):
@@ -48,18 +75,18 @@ def sync_outline(x_api_key: str = Header(...)):
         logger.warning("Invalid API Key: %s", x_api_key)
         raise HTTPException(status_code=403)
 
-    global previous_pocket_userstore
+    global pocket_userstore
     logger.info("Syncing Pocket Groups to Outline")
-    pocket_store = pocket.sync_from_pocket_id()
-    if pocket_store == previous_pocket_userstore:
+    pocket_was_updated = update_pocket_userstore(True)
+    if pocket_was_updated:
         logger.info("Skipping sync since Pocket Store is still the same...")
         return {"status": "ok"}
 
-    if len(pocket_store) == 0:
+    if len(pocket_userstore) == 0:
         logger.warning("Empty Pocket Store Detected -- Failing")
         raise HTTPException(status_code=404)
 
-    pocket_groups = pocket.get_unique_groups(pocket_store)
+    pocket_groups = pocket.get_unique_groups(pocket_userstore)
 
     if len(pocket_groups) == 0:
         logger.warning("Empty Pocket Groups Detected -- Failing")
@@ -68,10 +95,9 @@ def sync_outline(x_api_key: str = Header(...)):
     outline.create_missing_groups(pocket_groups)
     outline.delete_extra_groups(pocket_groups)
 
-    outline.set_missing_group_memberships(pocket_store)
-    outline.delete_extra_group_memberships(pocket_store)
+    outline.set_missing_group_memberships(pocket_userstore)
+    outline.delete_extra_group_memberships(pocket_userstore)
 
-    previous_pocket_userstore = pocket_store
     return {"status": "ok"}
 
 
@@ -81,8 +107,9 @@ def validate_ssh_login(pubkey: str, x_api_key: str = Header(...)):
         logger.warning("Invalid API Key: %s", x_api_key)
         raise HTTPException(status_code=403)
 
-    pocket_store = pocket.sync_from_pocket_id()
-    return ssh.validate_pubkey(pubkey, pocket_store)
+    global pocket_userstore
+    update_pocket_userstore(False)
+    return ssh.validate_pubkey(pubkey, pocket_userstore)
 
 
 if __name__ == "__main__":
