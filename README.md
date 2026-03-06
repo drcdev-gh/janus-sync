@@ -1,4 +1,4 @@
-# janus-sync — SSO permission propagation daemon
+# janus — SSO permission propagation daemon
 
 Lets other services commonly found in organisations or homelabs access group or claim information from PocketID.
 
